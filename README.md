@@ -3,6 +3,8 @@
 
 This is an unofficial way of getting data from the ventilation system and changing some settings of the ventilation system.
 
+Tested with Endura Delta on firmware version 0.0.67
+
 ### Installation
 
 Copy this folder to `<config_dir>/custom_components/example_sensor/`.
