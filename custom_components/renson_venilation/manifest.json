@@ -1,0 +1,11 @@
+{
+    "domain": "renson_ventilation",
+    "name": "Renson ventilation unit integration",
+    "documentation": "https://github.com/jimmyd-be/Home-Assistant-Sensor-Renson-Ventilation",
+    "issue_tracker": "https://github.com/jimmyd-be/Home-Assistant-Sensor-Renson-Ventilation/issues",
+    "version": "0.0.1",
+    "dependencies": [],
+    "codeowners": ["jimmyd-be"],
+    "requirements": ["requests"],
+    "iot_class": "local_polling"
+  }
