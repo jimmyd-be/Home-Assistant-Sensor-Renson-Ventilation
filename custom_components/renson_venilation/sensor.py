@@ -21,14 +21,9 @@ FILTER_REMAIN_URL = "http://[host]/JSON/Vars/Filter%20remaining%20time?index0=0&
 HUMIDITY_URL = "http://[host]/JSON/Vars/RH11?index0=0&index1=0&index2=0"
 FROST_PROTECTION_URL = "http://[host]/JSON/Vars/Frost%20protection%20active?index0=0&index1=0&index2=0"
 
-STATE_LEVEL1 = "level1"
-STATE_LEVEL2 = "level2"
-STATE_LEVEL3 = "level3"
-STATE_LEVEL4 = "level4"
-
-QUALITY_GOOD = "good"
-QUALITY_OK = "ok"
-QUALITY_BAD = "bad"
+QUALITY_GOOD = "Good"
+QUALITY_POOR = "Poor"
+QUALITY_BAD = "Bad"
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_HOST, default=[]): cv.string})
@@ -44,8 +39,8 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
     _LOGGER.info("Successfully connected to ventilation unit")
 
     add_entities([
-        NormalNumericSensorValue("CO2", host, CO2_URL, "carbon_dioxide", "ppm"),
-        NormalNumericSensorValue("Air quality", host, IAQ_URL, "", "ppm"),
+        NormalNumericSensorValue("CO2 value", host, CO2_URL, "carbon_dioxide", "ppm"),
+        NormalNumericSensorValue("Air quality value", host, IAQ_URL, "", "ppm"),
         NormalStringSensorValue("Ventilation level", host, CURRENT_LEVEL_URL, "", ""),
         NormalNumericSensorValue("Total airflow out", host, CURRENT_AIRFLOW_EXTRACT_URL, "", "m³/h"),
         NormalNumericSensorValue("Total airflow in", host, CURRENT_AIRFLOW_INGOING_URL, "", "m³/h"),
@@ -53,16 +48,45 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
         NormalNumericSensorValue("Extract air temperature", host, INDOOR_TEMP_URL, "temperature", "°C"),
         NormalNumericSensorValue("Filter change", host, FILTER_REMAIN_URL, "", "days"),
         NormalNumericSensorValue("Relative humidity", host, HUMIDITY_URL, "humidity", "%"),
-        BooleanSensorValue("Frost protection active", host, FROST_PROTECTION_URL)
+        BooleanSensorValue("Frost protection active", host, FROST_PROTECTION_URL),
+        QualitySensorValue("CO2", host, CO2_URL),
+        QualitySensorValue("Air quality", host, IAQ_URL)
     ])
 
 
+class QualitySensorValue(Entity):
+
+    def __init__(self, name, host, url):
+        self._state = None
+        self.sensorName = name
+        self.host = host
+        self.url = url
+
+    @property
+    def name(self):
+        return self.sensorName
+
+    @property
+    def state(self):
+        return self._state
+
+    def update(self):
+        r = requests.get(self.url.replace("[host]", self.host))
+
+        if r.status_code == 200:
+            jsonResult = r.json()
+            value = round(float(jsonResult["Value"]))
+
+            if value < 950:
+                self._state = QUALITY_GOOD
+            elif value < 1500:
+                self._state = QUALITY_POOR
+            else:
+                self._state = QUALITY_BAD
 
 class NormalNumericSensorValue(Entity):
-    """Representation of a Sensor."""
 
     def __init__(self, name, host, url, deviceClass, unitOfMeasurement):
-        """Initialize the sensor."""
         self._state = None
         self.sensorName = name
         self.host = host
@@ -72,7 +96,6 @@ class NormalNumericSensorValue(Entity):
 
     @property
     def name(self):
-        """Return the name of the sensor."""
         return self.sensorName
 
     @property
@@ -85,12 +108,9 @@ class NormalNumericSensorValue(Entity):
 
     @property
     def state(self):
-        """Return the state of the sensor."""
         return self._state
 
     def update(self):
-        """Fetch new state data for the sensor."""
-
         r = requests.get(self.url.replace("[host]", self.host))
 
         if r.status_code == 200:
@@ -98,10 +118,8 @@ class NormalNumericSensorValue(Entity):
             self._state = round(float(jsonResult["Value"]))
 
 class NormalStringSensorValue(Entity):
-    """Representation of a Sensor."""
 
     def __init__(self, name, host, url, deviceClass, unitOfMeasurement):
-        """Initialize the sensor."""
         self._state = None
         self.sensorName = name
         self.host = host
@@ -111,7 +129,6 @@ class NormalStringSensorValue(Entity):
 
     @property
     def name(self):
-        """Return the name of the sensor."""
         return self.sensorName
 
     @property
@@ -124,12 +141,9 @@ class NormalStringSensorValue(Entity):
 
     @property
     def state(self):
-        """Return the state of the sensor."""
         return self._state
 
     def update(self):
-        """Fetch new state data for the sensor."""
-
         r = requests.get(self.url.replace("[host]", self.host))
 
         if r.status_code == 200:
@@ -138,10 +152,8 @@ class NormalStringSensorValue(Entity):
 
 
 class BooleanSensorValue(Entity):
-    """Representation of a Sensor."""
 
     def __init__(self, name, host, url):
-        """Initialize the sensor."""
         self._state = None
         self.sensorName = name
         self.host = host
@@ -149,17 +161,13 @@ class BooleanSensorValue(Entity):
 
     @property
     def name(self):
-        """Return the name of the sensor."""
         return self.sensorName
 
     @property
     def state(self):
-        """Return the state of the sensor."""
         return self._state
 
     def update(self):
-        """Fetch new state data for the sensor."""
-
         r = requests.get(self.url.replace("[host]", self.host))
 
         if r.status_code == 200:
