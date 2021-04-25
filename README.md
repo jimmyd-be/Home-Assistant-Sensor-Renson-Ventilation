@@ -17,3 +17,14 @@ sensor:
   - platform: renson_ventilation
     host: 127.0.0.1
 ```
+
+For configuring the build in services:
+```yaml
+# Example configuration.yaml entry
+renson_ventilation:
+  host: 127.0.0.1
+```
+
+## Features
+- Set the manual level of the ventilation system (manual_level service).
+- Gets all the data from the ventilation system that can be viewed in the Endura Delta application on the tab 'Data'.

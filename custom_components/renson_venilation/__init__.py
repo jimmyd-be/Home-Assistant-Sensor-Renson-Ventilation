@@ -17,7 +17,6 @@ class ValueData:
     self.Value = value
 
 def setup(hass, config):
-    _LOGGER.error(config[DOMAIN][CONF_HOST])
     host = config[DOMAIN][CONF_HOST]
 
     def handle_manual_level_set(call):
