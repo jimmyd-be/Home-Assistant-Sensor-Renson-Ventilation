@@ -7,6 +7,8 @@ import logging
 
 _LOGGER = logging.getLogger(__name__)
 
+DOMAIN = "renson_ventilation"
+
 CONF_HOST = "host"
 
 META_DATA_URL = "http://[host]/JSON/MetaData"
