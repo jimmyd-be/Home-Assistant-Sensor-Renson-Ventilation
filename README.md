@@ -2,6 +2,7 @@
 # Home Assistant Sensor for Renson ventilation
 
 This is an unofficial way of getting data from the ventilation system and changing some settings of the ventilation system.
+I will try to implement all features of the Endura delta app inside the integration of Home Assistant.
 
 Tested with Endura Delta on firmware version 0.0.67
 
@@ -26,5 +27,7 @@ renson_ventilation:
 ```
 
 ## Features
-- Set the manual level of the ventilation system (manual_level service).
+- Set the manual level of the ventilation system.
+- Set ventilation timer
 - Gets all the data from the ventilation system that can be viewed in the Endura Delta application on the tab 'Data'.
+- Synchronize date and time with computer and ventilation system

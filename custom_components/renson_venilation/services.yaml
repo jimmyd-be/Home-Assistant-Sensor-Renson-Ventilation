@@ -14,7 +14,7 @@ manual_level:
       # Description of the field
       description: Manual level setting
       # Whether or not field is required (default = false)
-      required: false
+      required: true
       # Advanced fields are only shown when the advanced mode is enabled for the user (default = false)
       advanced: false
       # The default field value
@@ -33,3 +33,34 @@ manual_level:
 sync_time:
   name: Synchronize time and date
   description: Synchronize time and date with device
+
+
+timer_level:
+  name: Set timer
+  description: Set the ventilation timer
+  fields:
+    timer_level:
+      name: Level
+      description: Level setting
+      required: true
+      advanced: false
+      default: "Level1"
+      selector:
+        select:
+          options:
+            - "Level1"
+            - "Level2"
+            - "Level3"
+            - "Level4"
+    time:
+      name: Time
+      description: Time of the timer (0 will disable the timer)
+      required: true
+      advanced: false
+      default: 0
+      number:
+        min: 0
+        max: 1440
+        step: 10
+        unit_of_measurement: "min"
+        mode: slider

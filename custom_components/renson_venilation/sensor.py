@@ -150,7 +150,7 @@ class LevelSensorValue(Entity):
 
         if r.status_code == 200:
             jsonResult = r.json()
-            self._state = jsonResult["Value"].split()[-1]
+            self._state = jsonResult["Value"]
 
 
 class BooleanSensorValue(Entity):

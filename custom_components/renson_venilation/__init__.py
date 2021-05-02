@@ -11,6 +11,7 @@ DOMAIN = "renson_ventilation"
 
 SET_MANUAL_LEVEL_URL = "http://[host]/JSON/Vars/Manual%20level?index0=0&index1=0&index2=0"
 TIME_AND_DATE_URL = "http://[host]/JSON/Vars/Date%20and%20time?index0=0&index1=0&index2=0"
+TIMER_URL = "http://[host]/JSON/Vars/Ventilation%20timer?index0=0&index1=0&index2=0"
 
 manualLevels = ["Off", "Level1", "Level2", "Level3", "Level4"]
 
@@ -49,8 +50,22 @@ def setup(hass, config):
         else:
             _LOGGER.error('Ventilation unit did not return 200')
 
+    def handle_timer_level(call):
+        level = call.data.get("timer_level", "Level1")
+        time = call.data.get("time", 0)
+
+        if level in manualLevels:
+            data = ValueData(str(time) + " min " + level)
+            r = requests.post(TIMER_URL.replace("[host]", host), data = json.dumps(data.__dict__))
+
+            if r.status_code != 200:
+                _LOGGER.error('Ventilation unit did not return 200')
+        else:
+            _LOGGER.error('Level does not exist', call.data.get("timer_level", "Off"))
+
 
     hass.services.register(DOMAIN, "manual_level", handle_manual_level_set)
     hass.services.register(DOMAIN, "sync_time", handle_sync_time)
+    hass.services.register(DOMAIN, "timer_level", handle_timer_level)
 
     return True
