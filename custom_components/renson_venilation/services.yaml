@@ -28,3 +28,8 @@ manual_level:
             - "Level2"
             - "Level3"
             - "Level4"
+
+
+sync_time:
+  name: Synchronize time and date
+  description: Synchronize time and date with device

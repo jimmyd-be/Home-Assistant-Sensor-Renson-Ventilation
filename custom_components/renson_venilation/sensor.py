@@ -43,7 +43,7 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
     add_entities([
         NormalNumericSensorValue("CO2 value", host, CO2_URL, "carbon_dioxide", "ppm"),
         NormalNumericSensorValue("Air quality value", host, IAQ_URL, "", "ppm"),
-        NormalStringSensorValue("Ventilation level", host, CURRENT_LEVEL_URL, "", ""),
+        LevelSensorValue("Ventilation level", host, CURRENT_LEVEL_URL, "", ""),
         NormalNumericSensorValue("Total airflow out", host, CURRENT_AIRFLOW_EXTRACT_URL, "", "m³/h"),
         NormalNumericSensorValue("Total airflow in", host, CURRENT_AIRFLOW_INGOING_URL, "", "m³/h"),
         NormalNumericSensorValue("Outdoor air temperature", host, OUTDOOR_TEMP_URL, "temperature", "°C"),
@@ -119,7 +119,7 @@ class NormalNumericSensorValue(Entity):
             jsonResult = r.json()
             self._state = round(float(jsonResult["Value"]))
 
-class NormalStringSensorValue(Entity):
+class LevelSensorValue(Entity):
 
     def __init__(self, name, host, url, deviceClass, unitOfMeasurement):
         self._state = None
@@ -150,7 +150,7 @@ class NormalStringSensorValue(Entity):
 
         if r.status_code == 200:
             jsonResult = r.json()
-            self._state = jsonResult["Value"]
+            self._state = jsonResult["Value"].split()[-1]
 
 
 class BooleanSensorValue(Entity):
