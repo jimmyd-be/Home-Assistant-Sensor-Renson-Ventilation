@@ -64,3 +64,40 @@ timer_level:
         step: 10
         unit_of_measurement: "min"
         mode: slider
+
+set_breeze:
+  name: Set breeze
+  description: Set the breeze function of the ventilation system
+  fields:
+    breeze_level:
+      name: Level
+      description: Ventilation level when breeze function is activated
+      required: false
+      advanced: false
+      default: "Level3"
+      selector:
+        select:
+          options:
+            - "Level1"
+            - "Level2"
+            - "Level3"
+            - "Level4"
+    temperature:
+      name: Temperature
+      description: Temperature when the breeze function should be activated
+      required: false
+      advanced: false
+      default: 18
+      number:
+        min: 15
+        max: 35
+        step: 10
+        unit_of_measurement: "°C"
+        mode: slider
+    activate:
+      name: Activate
+      description: Activate or disable the breeze feature
+      required: true
+      advanced: false
+      default: false
+      bool:
