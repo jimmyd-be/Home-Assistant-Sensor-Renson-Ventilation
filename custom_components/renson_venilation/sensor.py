@@ -11,17 +11,18 @@ DOMAIN = "renson_ventilation"
 
 CONF_HOST = "host"
 
+RENSON_API_URL = "http://[host]/JSON/Vars/[field]?index0=0&index1=0&index2=0"
 META_DATA_URL = "http://[host]/JSON/MetaData"
-CO2_URL = "http://[host]/JSON/Vars/CO2?index0=0&index1=0&index2=0"
-IAQ_URL = "http://[host]/JSON/Vars/IAQ?index0=0&index1=0&index2=0"
-CURRENT_LEVEL_URL = "http://[host]/JSON/Vars/Current%20ventilation%20level?index0=0&index1=0&index2=0"
-CURRENT_AIRFLOW_EXTRACT_URL = "http://[host]/JSON/Vars/Current%20ETA%20airflow?index0=0&index1=0&index2=0"
-CURRENT_AIRFLOW_INGOING_URL = "http://[host]/JSON/Vars/Current%20SUP%20airflow?index0=0&index1=0&index2=0"
-OUTDOOR_TEMP_URL = "http://[host]/JSON/Vars/T21?index0=0&index1=0&index2=0"
-INDOOR_TEMP_URL = "http://[host]/JSON/Vars/T11?index0=0&index1=0&index2=0"
-FILTER_REMAIN_URL = "http://[host]/JSON/Vars/Filter%20remaining%20time?index0=0&index1=0&index2=0"
-HUMIDITY_URL = "http://[host]/JSON/Vars/RH11?index0=0&index1=0&index2=0"
-FROST_PROTECTION_URL = "http://[host]/JSON/Vars/Frost%20protection%20active?index0=0&index1=0&index2=0"
+CO2_FIELD = "CO2"
+AIR_QUALITY_FIELD = "IAQ"
+CURRENT_LEVEL_FIELD = "Current%20ventilation%20level"
+CURRENT_AIRFLOW_EXTRACT_FIELD = "Current%20ETA%20airflow"
+CURRENT_AIRFLOW_INGOING_FIELD = "Current%20SUP%20airflow"
+OUTDOOR_TEMP_FIELD = "T21"
+INDOOR_TEMP_FIELD = "T11"
+FILTER_REMAIN_FIELD = "Filter%20remaining%20time"
+HUMIDITY_FIELD = "RH11"
+FROST_PROTECTION_FIELD = "Frost%20protection%20active"
 
 QUALITY_GOOD = "Good"
 QUALITY_POOR = "Poor"
@@ -29,6 +30,9 @@ QUALITY_BAD = "Bad"
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_HOST, default=[]): cv.string})
+
+def getUrl(host, field):
+    return RENSON_API_URL.replace("[host]", host).replace("[field]", field)
 
 def setup_platform(hass, config, add_entities, discovery_info=None):
     host = config[CONF_HOST]
@@ -41,27 +45,26 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
     _LOGGER.info("Successfully connected to ventilation unit")
 
     add_entities([
-        NormalNumericSensorValue("CO2 value", host, CO2_URL, "carbon_dioxide", "ppm"),
-        NormalNumericSensorValue("Air quality value", host, IAQ_URL, "", "ppm"),
-        LevelSensorValue("Ventilation level", host, CURRENT_LEVEL_URL, "", ""),
-        NormalNumericSensorValue("Total airflow out", host, CURRENT_AIRFLOW_EXTRACT_URL, "", "m³/h"),
-        NormalNumericSensorValue("Total airflow in", host, CURRENT_AIRFLOW_INGOING_URL, "", "m³/h"),
-        NormalNumericSensorValue("Outdoor air temperature", host, OUTDOOR_TEMP_URL, "temperature", "°C"),
-        NormalNumericSensorValue("Extract air temperature", host, INDOOR_TEMP_URL, "temperature", "°C"),
-        NormalNumericSensorValue("Filter change", host, FILTER_REMAIN_URL, "", "days"),
-        NormalNumericSensorValue("Relative humidity", host, HUMIDITY_URL, "humidity", "%"),
-        BooleanSensorValue("Frost protection active", host, FROST_PROTECTION_URL),
-        QualitySensorValue("CO2", host, CO2_URL),
-        QualitySensorValue("Air quality", host, IAQ_URL)
+        NormalNumericSensorValue("CO2 value", getUrl(host, CO2_FIELD), "carbon_dioxide", "ppm"),
+        NormalNumericSensorValue("Air quality value", getUrl(host, AIR_QUALITY_FIELD), "", "ppm"),
+        LevelSensorValue("Ventilation level", getUrl(host, CURRENT_LEVEL_FIELD), "", ""),
+        NormalNumericSensorValue("Total airflow out", getUrl(host, CURRENT_AIRFLOW_EXTRACT_FIELD), "", "m³/h"),
+        NormalNumericSensorValue("Total airflow in", getUrl(host, CURRENT_AIRFLOW_INGOING_FIELD), "", "m³/h"),
+        NormalNumericSensorValue("Outdoor air temperature", getUrl(host, OUTDOOR_TEMP_FIELD), "temperature", "°C"),
+        NormalNumericSensorValue("Extract air temperature", getUrl(host, INDOOR_TEMP_FIELD), "temperature", "°C"),
+        NormalNumericSensorValue("Filter change", getUrl(host, FILTER_REMAIN_FIELD), "", "days"),
+        NormalNumericSensorValue("Relative humidity", getUrl(host, HUMIDITY_FIELD), "humidity", "%"),
+        BooleanSensorValue("Frost protection active", getUrl(host, FROST_PROTECTION_FIELD)),
+        QualitySensorValue("CO2", getUrl(host, CO2_FIELD)),
+        QualitySensorValue("Air quality", getUrl(host, AIR_QUALITY_FIELD))
     ])
 
 
 class QualitySensorValue(Entity):
 
-    def __init__(self, name, host, url):
+    def __init__(self, name, url):
         self._state = None
         self.sensorName = name
-        self.host = host
         self.url = url
 
     @property
@@ -73,7 +76,7 @@ class QualitySensorValue(Entity):
         return self._state
 
     def update(self):
-        r = requests.get(self.url.replace("[host]", self.host))
+        r = requests.get(self.url)
 
         if r.status_code == 200:
             jsonResult = r.json()
@@ -88,10 +91,9 @@ class QualitySensorValue(Entity):
 
 class NormalNumericSensorValue(Entity):
 
-    def __init__(self, name, host, url, deviceClass, unitOfMeasurement):
+    def __init__(self, name, url, deviceClass, unitOfMeasurement):
         self._state = None
         self.sensorName = name
-        self.host = host
         self.url = url
         self.deviceClass = deviceClass
         self.unitOfMeasurement = unitOfMeasurement
@@ -113,7 +115,7 @@ class NormalNumericSensorValue(Entity):
         return self._state
 
     def update(self):
-        r = requests.get(self.url.replace("[host]", self.host))
+        r = requests.get(self.url)
 
         if r.status_code == 200:
             jsonResult = r.json()
@@ -121,10 +123,9 @@ class NormalNumericSensorValue(Entity):
 
 class LevelSensorValue(Entity):
 
-    def __init__(self, name, host, url, deviceClass, unitOfMeasurement):
+    def __init__(self, name, url, deviceClass, unitOfMeasurement):
         self._state = None
         self.sensorName = name
-        self.host = host
         self.url = url
         self.deviceClass = deviceClass
         self.unitOfMeasurement = unitOfMeasurement
@@ -146,7 +147,7 @@ class LevelSensorValue(Entity):
         return self._state
 
     def update(self):
-        r = requests.get(self.url.replace("[host]", self.host))
+        r = requests.get(self.url)
 
         if r.status_code == 200:
             jsonResult = r.json()
@@ -155,10 +156,9 @@ class LevelSensorValue(Entity):
 
 class BooleanSensorValue(Entity):
 
-    def __init__(self, name, host, url):
+    def __init__(self, name, url):
         self._state = None
         self.sensorName = name
-        self.host = host
         self.url = url
 
     @property
@@ -170,7 +170,7 @@ class BooleanSensorValue(Entity):
         return self._state
 
     def update(self):
-        r = requests.get(self.url.replace("[host]", self.host))
+        r = requests.get(self.url)
 
         if r.status_code == 200:
             jsonResult = r.json()

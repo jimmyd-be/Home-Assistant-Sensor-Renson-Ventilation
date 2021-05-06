@@ -9,16 +9,18 @@ CONF_HOST = "host"
 
 DOMAIN = "renson_ventilation"
 
-SET_MANUAL_LEVEL_URL = "http://[host]/JSON/Vars/Manual%20level?index0=0&index1=0&index2=0"
-TIME_AND_DATE_URL = "http://[host]/JSON/Vars/Date%20and%20time?index0=0&index1=0&index2=0"
-TIMER_URL = "http://[host]/JSON/Vars/Ventilation%20timer?index0=0&index1=0&index2=0"
+RENSON_API_URL = "http://[host]/JSON/Vars/[field]?index0=0&index1=0&index2=0"
 
-BREEZE_TEMPERATURE_URL = "http://[host]/JSON/Vars/Breeze%20activation%20temperature?index0=0&index1=0&index2=0"
-BREEZE_ENABLE_URL = "http://[host]/JSON/Vars/Breeze%20enable?index0=0&index1=0&index2=0"
-BREEZE_LEVEL_URL = "http://[host]/JSON/Vars/Breeze%20level?index0=0&index1=0&index2=0"
+SET_MANUAL_LEVEL_FIELD = "Manual%20level"
+TIME_AND_DATE_FIELD = "Date%20and%20time"
+TIMER_FIELD = "Ventilation%20timer"
 
-DAYTIME_URL = "http://[host]/JSON/Vars/Start%20daytime?index0=0&index1=0&index2=0"
-NIGTHTIME_URL = "http://[host]/JSON/Vars/Start%20night-time?index0=0&index1=0&index2=0"
+BREEZE_TEMPERATURE_FIELD = "Breeze%20activation%20temperature"
+BREEZE_ENABLE_FIELD = "Breeze%20enable"
+BREEZE_LEVEL_FIELD = "Breeze%20level"
+
+DAYTIME_FIELD = "Start%20daytime"
+NIGTHTIME_FIELD = "Start%20night-time"
 
 
 manualLevels = ["Off", "Level1", "Level2", "Level3", "Level4"]
@@ -26,6 +28,9 @@ manualLevels = ["Off", "Level1", "Level2", "Level3", "Level4"]
 class ValueData:
   def __init__(self, value):
     self.Value = value
+
+def getUrl(host, field):
+    return RENSON_API_URL.replace("[host]", host).replace("[field]", field)
 
 def setup(hass, config):
     host = config[DOMAIN][CONF_HOST]
@@ -37,7 +42,7 @@ def setup(hass, config):
         data = ValueData(level)
 
         if level in manualLevels:
-            r = requests.post(SET_MANUAL_LEVEL_URL.replace("[host]", host), data = json.dumps(data.__dict__))
+            r = requests.post(getUrl(host, SET_MANUAL_LEVEL_FIELD), data = json.dumps(data.__dict__))
 
             if r.status_code != 200:
                 _LOGGER.error('Ventilation unit did not return 200')
@@ -45,7 +50,7 @@ def setup(hass, config):
             _LOGGER.error('Level does not exist', call.data.get("manual_level", "Off"))
 
     def handle_sync_time(call):
-        response = requests.get(TIME_AND_DATE_URL.replace("[host]", host))
+        response = requests.get(getUrl(host, TIME_AND_DATE_FIELD))
         
         if response.status_code == 200:
             jsonResult = response.json()
@@ -54,7 +59,7 @@ def setup(hass, config):
 
             if currentTime != deviceTime:
                 data = ValueData(currentTime.strftime("%d %b %Y %H:%M").lower())
-                r = requests.post(TIME_AND_DATE_URL.replace("[host]", host), data = json.dumps(data.__dict__))
+                r = requests.post(getUrl(host, TIME_AND_DATE_FIELD), data = json.dumps(data.__dict__))
         else:
             _LOGGER.error('Ventilation unit did not return 200')
 
@@ -64,7 +69,7 @@ def setup(hass, config):
 
         if level in manualLevels:
             data = ValueData(str(time) + " min " + level)
-            r = requests.post(TIMER_URL.replace("[host]", host), data = json.dumps(data.__dict__))
+            r = requests.post(getUrl(host, TIMER_FIELD), data = json.dumps(data.__dict__))
 
             if r.status_code != 200:
                 _LOGGER.error('Ventilation unit did not return 200')
@@ -78,7 +83,7 @@ def setup(hass, config):
 
         if level in manualLevels and level != "":
             data = ValueData(level)
-            r = requests.post(BREEZE_LEVEL_URL.replace("[host]", host), data = json.dumps(data.__dict__))
+            r = requests.post(getUrl(host, BREEZE_LEVEL_FIELD), data = json.dumps(data.__dict__))
 
             if r.status_code != 200:
                 _LOGGER.error('Ventilation unit did not return 200')
@@ -87,13 +92,13 @@ def setup(hass, config):
 
         if temperature != 0:
             data = ValueData(str(temperature))
-            r = requests.post(BREEZE_TEMPERATURE_URL.replace("[host]", host), data = json.dumps(data.__dict__))
+            r = requests.post(getUrl(host, BREEZE_TEMPERATURE_FIELD), data = json.dumps(data.__dict__))
 
             if r.status_code != 200:
                 _LOGGER.error('Ventilation unit did not return 200')
 
         data = ValueData(str(int(activated)))
-        r = requests.post(BREEZE_ENABLE_URL.replace("[host]", host), data = json.dumps(data.__dict__))
+        r = requests.post(getUrl(host, BREEZE_ENABLE_FIELD), data = json.dumps(data.__dict__))
 
         if r.status_code != 200:
             _LOGGER.error('Ventilation unit did not return 200')
@@ -103,13 +108,13 @@ def setup(hass, config):
         nigth = call.data.get("night", "22:00")
 
         data = ValueData(day)
-        r = requests.post(DAYTIME_URL.replace("[host]", host), data = json.dumps(data.__dict__))
+        r = requests.post(getUrl(host, DAYTIME_FIELD), data = json.dumps(data.__dict__))
 
         if r.status_code != 200:
             _LOGGER.error('Start daytime cannot be set')
 
         data = ValueData(nigth)
-        r = requests.post(NIGTHTIME_URL.replace("[host]", host), data = json.dumps(data.__dict__))
+        r = requests.post(getUrl(host, NIGTHTIME_FIELD), data = json.dumps(data.__dict__))
 
         if r.status_code != 200:
             _LOGGER.error('Start nigthtime cannot be set')
