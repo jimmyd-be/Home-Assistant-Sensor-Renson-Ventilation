@@ -101,3 +101,23 @@ set_breeze:
       advanced: false
       default: false
       bool:
+
+set_day_night_time:
+  name: Set day and night time
+  description: Set the day and night time of the system
+  fields:
+    day:
+      name: Start day
+      description: Start time of the day
+      required: true
+      advanced: false
+      default: false
+      time:
+    night:
+      name: Start night
+      description: Start time of the night
+      required: true
+      advanced: false
+      default: false
+      time:
+    

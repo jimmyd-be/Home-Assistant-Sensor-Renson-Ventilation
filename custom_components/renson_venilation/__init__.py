@@ -17,6 +17,10 @@ BREEZE_TEMPERATURE_URL = "http://[host]/JSON/Vars/Breeze%20activation%20temperat
 BREEZE_ENABLE_URL = "http://[host]/JSON/Vars/Breeze%20enable?index0=0&index1=0&index2=0"
 BREEZE_LEVEL_URL = "http://[host]/JSON/Vars/Breeze%20level?index0=0&index1=0&index2=0"
 
+DAYTIME_URL = "http://[host]/JSON/Vars/Start%20daytime?index0=0&index1=0&index2=0"
+NIGTHTIME_URL = "http://[host]/JSON/Vars/Start%20night-time?index0=0&index1=0&index2=0"
+
+
 manualLevels = ["Off", "Level1", "Level2", "Level3", "Level4"]
 
 class ValueData:
@@ -94,10 +98,27 @@ def setup(hass, config):
         if r.status_code != 200:
             _LOGGER.error('Ventilation unit did not return 200')
 
+    def handle_set_time(call):
+        day = call.data.get("day", "7:00")
+        nigth = call.data.get("night", "22:00")
+
+        data = ValueData(day)
+        r = requests.post(DAYTIME_URL.replace("[host]", host), data = json.dumps(data.__dict__))
+
+        if r.status_code != 200:
+            _LOGGER.error('Start daytime cannot be set')
+
+        data = ValueData(nigth)
+        r = requests.post(NIGTHTIME_URL.replace("[host]", host), data = json.dumps(data.__dict__))
+
+        if r.status_code != 200:
+            _LOGGER.error('Start nigthtime cannot be set')
+
 
     hass.services.register(DOMAIN, "manual_level", handle_manual_level_set)
     hass.services.register(DOMAIN, "sync_time", handle_sync_time)
     hass.services.register(DOMAIN, "timer_level", handle_timer_level)
     hass.services.register(DOMAIN, "set_breeze", handle_set_breeze)
+    hass.services.register(DOMAIN, "set_day_night_time", handle_set_time)
 
     return True
