@@ -15,14 +15,14 @@ RENSON_API_URL = "http://[host]/JSON/Vars/[field]?index0=0&index1=0&index2=0"
 META_DATA_URL = "http://[host]/JSON/MetaData"
 CO2_FIELD = "CO2"
 AIR_QUALITY_FIELD = "IAQ"
-CURRENT_LEVEL_FIELD = "Current%20ventilation%20level"
-CURRENT_AIRFLOW_EXTRACT_FIELD = "Current%20ETA%20airflow"
-CURRENT_AIRFLOW_INGOING_FIELD = "Current%20SUP%20airflow"
+CURRENT_LEVEL_FIELD = "Current ventilation level"
+CURRENT_AIRFLOW_EXTRACT_FIELD = "Current ETA airflow"
+CURRENT_AIRFLOW_INGOING_FIELD = "Current SUP airflow"
 OUTDOOR_TEMP_FIELD = "T21"
 INDOOR_TEMP_FIELD = "T11"
-FILTER_REMAIN_FIELD = "Filter%20remaining%20time"
+FILTER_REMAIN_FIELD = "Filter remaining time"
 HUMIDITY_FIELD = "RH11"
-FROST_PROTECTION_FIELD = "Frost%20protection%20active"
+FROST_PROTECTION_FIELD = "Frost protection active"
 
 QUALITY_GOOD = "Good"
 QUALITY_POOR = "Poor"
@@ -32,7 +32,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_HOST, default=[]): cv.string})
 
 def getUrl(host, field):
-    return RENSON_API_URL.replace("[host]", host).replace("[field]", field)
+    return RENSON_API_URL.replace("[host]", host).replace("[field]", field.replace(" ", "%20"))
 
 def setup_platform(hass, config, add_entities, discovery_info=None):
     host = config[CONF_HOST]

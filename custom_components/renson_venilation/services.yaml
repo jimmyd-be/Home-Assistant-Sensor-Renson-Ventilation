@@ -120,4 +120,79 @@ set_day_night_time:
       advanced: false
       default: false
       time:
-    
+
+set_pollution_settings:
+  name: Set pollution settings
+  description: Set all the pollution settings of the ventilation system
+  fields:
+    day_pollution_level:
+      name: Day pollution Level
+      description: Ventilation level when pollution is detected in the day
+      required: false
+      advanced: false
+      default: "Level3"
+      selector:
+        select:
+          options:
+            - "Level1"
+            - "Level2"
+            - "Level3"
+            - "Level4"
+    night_pollution_level:
+      name: Night pollution Level
+      description: Ventilation level when pollution is detected in the night
+      required: false
+      advanced: false
+      default: "Level2"
+      selector:
+        select:
+          options:
+            - "Level1"
+            - "Level2"
+            - "Level3"
+            - "Level4"
+    humidity_control:
+      name: Enable humidity control
+      description: Activate or disable the humidity control
+      required: false
+      advanced: false
+      default: true
+      bool:
+    airquality_control:
+      name: Enable air quality control
+      description: Activate or disable the air quality control
+      required: false
+      advanced: false
+      default: true
+      bool:
+    co2_control:
+      name: Enable CO2 control
+      description: Activate or disable the CO2 control
+      required: false
+      advanced: false
+      default: true
+      bool:
+    co2_threshold:
+      name: co2 threshold
+      description: Sets the CO2 pollution threshold level in ppm
+      required: false
+      advanced: false
+      default: 600
+      number:
+        min: 400
+        max: 2000
+        step: 50
+        unit_of_measurement: "ppm"
+        mode: slider
+    co2_hysteresis:
+      name: co2 hysteresis
+      description: Sets the CO2 pollution threshold hysteresis level in ppm
+      required: false
+      advanced: false
+      default: 100
+      number:
+        min: 50
+        max: 400
+        step: 50
+        unit_of_measurement: "ppm"
+        mode: slider

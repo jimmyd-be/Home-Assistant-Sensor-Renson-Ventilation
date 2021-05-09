@@ -32,3 +32,5 @@ renson_ventilation:
 - Set breeze feature settings and active/deactive breeze function
 - Gets all the data from the ventilation system that can be viewed in the Endura Delta application on the tab 'Data'.
 - Synchronize date and time with computer and ventilation system
+- Set start daytime and nighttime time
+- Set pollution settings
