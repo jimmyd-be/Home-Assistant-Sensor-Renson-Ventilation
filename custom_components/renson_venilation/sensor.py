@@ -41,6 +41,7 @@ AIR_QUALITY_CONTROL_FIELD = "Trigger internal pollution alert on IAQ"
 CO2_CONTROL_FIELD = "Trigger internal pollution alert on CO2"
 CO2_THRESHOLD_FIELD = "CO2 threshold"
 CO2_HYSTERESIS_FIELD = "CO2 hysteresis"
+BREEZE_MET_FIELD = "Breeze conditions met"
 
 QUALITY_GOOD = "Good"
 QUALITY_POOR = "Poor"
@@ -80,6 +81,7 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
         NormalNumericSensorValue("Breeze temperature", getUrl(host, BREEZE_TEMPERATURE_FIELD), "temperature", "°C"),
         BooleanSensorValue("Breeze enabled", getUrl(host, BREEZE_ENABLE_FIELD)),
         StringSensorValue("Breeze level", getUrl(host, BREEZE_LEVEL_FIELD), "", ""),
+        BooleanSensorValue("Breeze conditions met", getUrl(host, BREEZE_MET_FIELD)),
         StringSensorValue("Start day time", getUrl(host, DAYTIME_FIELD), "", ""),
         StringSensorValue("Start night time", getUrl(host, NIGTHTIME_FIELD), "", ""),
         StringSensorValue("Day pollution level", getUrl(host, DAY_POLLUTION_FIELD), "", ""),
@@ -206,4 +208,4 @@ class BooleanSensorValue(Entity):
 
         if r.status_code == 200:
             jsonResult = r.json()
-            self._state = bool(jsonResult["Value"])
+            self._state = bool(int(jsonResult["Value"]))
