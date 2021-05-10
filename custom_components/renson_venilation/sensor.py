@@ -24,6 +24,24 @@ FILTER_REMAIN_FIELD = "Filter remaining time"
 HUMIDITY_FIELD = "RH11"
 FROST_PROTECTION_FIELD = "Frost protection active"
 
+MANUAL_LEVEL_FIELD = "Manual level"
+TIME_AND_DATE_FIELD = "Date and time"
+
+BREEZE_TEMPERATURE_FIELD = "Breeze activation temperature"
+BREEZE_ENABLE_FIELD = "Breeze enable"
+BREEZE_LEVEL_FIELD = "Breeze level"
+
+DAYTIME_FIELD = "Start daytime"
+NIGTHTIME_FIELD = "Start night-time"
+
+DAY_POLLUTION_FIELD = "Day pollution-triggered ventilation level"
+NIGHT_POLLUTION_FIELD ="Night pollution-triggered ventilation level"
+HUMIDITY_CONTROL_FIELD = "Trigger internal pollution alert on RH"
+AIR_QUALITY_CONTROL_FIELD = "Trigger internal pollution alert on IAQ"
+CO2_CONTROL_FIELD = "Trigger internal pollution alert on CO2"
+CO2_THRESHOLD_FIELD = "CO2 threshold"
+CO2_HYSTERESIS_FIELD = "CO2 hysteresis"
+
 QUALITY_GOOD = "Good"
 QUALITY_POOR = "Poor"
 QUALITY_BAD = "Bad"
@@ -47,7 +65,7 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
     add_entities([
         NormalNumericSensorValue("CO2 value", getUrl(host, CO2_FIELD), "carbon_dioxide", "ppm"),
         NormalNumericSensorValue("Air quality value", getUrl(host, AIR_QUALITY_FIELD), "", "ppm"),
-        LevelSensorValue("Ventilation level", getUrl(host, CURRENT_LEVEL_FIELD), "", ""),
+        StringSensorValue("Ventilation level", getUrl(host, CURRENT_LEVEL_FIELD), "", ""),
         NormalNumericSensorValue("Total airflow out", getUrl(host, CURRENT_AIRFLOW_EXTRACT_FIELD), "", "m³/h"),
         NormalNumericSensorValue("Total airflow in", getUrl(host, CURRENT_AIRFLOW_INGOING_FIELD), "", "m³/h"),
         NormalNumericSensorValue("Outdoor air temperature", getUrl(host, OUTDOOR_TEMP_FIELD), "temperature", "°C"),
@@ -56,7 +74,21 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
         NormalNumericSensorValue("Relative humidity", getUrl(host, HUMIDITY_FIELD), "humidity", "%"),
         BooleanSensorValue("Frost protection active", getUrl(host, FROST_PROTECTION_FIELD)),
         QualitySensorValue("CO2", getUrl(host, CO2_FIELD)),
-        QualitySensorValue("Air quality", getUrl(host, AIR_QUALITY_FIELD))
+        QualitySensorValue("Air quality", getUrl(host, AIR_QUALITY_FIELD)),
+        StringSensorValue("Manual level", getUrl(host, MANUAL_LEVEL_FIELD), "", ""),
+        StringSensorValue("System time", getUrl(host, TIME_AND_DATE_FIELD), "timestamp", ""),
+        NormalNumericSensorValue("Breeze temperature", getUrl(host, BREEZE_TEMPERATURE_FIELD), "temperature", "°C"),
+        BooleanSensorValue("Breeze enabled", getUrl(host, BREEZE_ENABLE_FIELD)),
+        StringSensorValue("Breeze level", getUrl(host, BREEZE_LEVEL_FIELD), "", ""),
+        StringSensorValue("Start day time", getUrl(host, DAYTIME_FIELD), "", ""),
+        StringSensorValue("Start night time", getUrl(host, NIGTHTIME_FIELD), "", ""),
+        StringSensorValue("Day pollution level", getUrl(host, DAY_POLLUTION_FIELD), "", ""),
+        StringSensorValue("Night pollution level", getUrl(host, NIGHT_POLLUTION_FIELD), "", ""),
+        BooleanSensorValue("Humidity control enabled", getUrl(host, HUMIDITY_CONTROL_FIELD)),
+        BooleanSensorValue("Air quality control enabled", getUrl(host, AIR_QUALITY_CONTROL_FIELD)),
+        BooleanSensorValue("CO2 control enabled", getUrl(host, CO2_CONTROL_FIELD)),
+        NormalNumericSensorValue("CO2 threshold", getUrl(host, CO2_THRESHOLD_FIELD), "", "ppm"),
+        NormalNumericSensorValue("CO2 hysteresis", getUrl(host, CO2_HYSTERESIS_FIELD), "", "ppm")
     ])
 
 
@@ -121,7 +153,7 @@ class NormalNumericSensorValue(Entity):
             jsonResult = r.json()
             self._state = round(float(jsonResult["Value"]))
 
-class LevelSensorValue(Entity):
+class StringSensorValue(Entity):
 
     def __init__(self, name, url, deviceClass, unitOfMeasurement):
         self._state = None
