@@ -43,6 +43,10 @@ CO2_THRESHOLD_FIELD = "CO2 threshold"
 CO2_HYSTERESIS_FIELD = "CO2 hysteresis"
 BREEZE_MET_FIELD = "Breeze conditions met"
 
+PREHEATER_FIELD = "Preheater enabled"
+BYPASS_TEMPERATURE_FIELD = "Bypass activation temperature"
+BYPASS_LEVEL_FIELD = "Bypass level"
+
 QUALITY_GOOD = "Good"
 QUALITY_POOR = "Poor"
 QUALITY_BAD = "Bad"
@@ -90,7 +94,10 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
         BooleanSensorValue("Air quality control enabled", getUrl(host, AIR_QUALITY_CONTROL_FIELD)),
         BooleanSensorValue("CO2 control enabled", getUrl(host, CO2_CONTROL_FIELD)),
         NormalNumericSensorValue("CO2 threshold", getUrl(host, CO2_THRESHOLD_FIELD), "", "ppm"),
-        NormalNumericSensorValue("CO2 hysteresis", getUrl(host, CO2_HYSTERESIS_FIELD), "", "ppm")
+        NormalNumericSensorValue("CO2 hysteresis", getUrl(host, CO2_HYSTERESIS_FIELD), "", "ppm"),
+        BooleanSensorValue("Preheater enabled", getUrl(host, PREHEATER_FIELD)),
+        NormalNumericSensorValue("Bypass activation temperature", getUrl(host, BYPASS_TEMPERATURE_FIELD), "temperature", "°C"),
+        NormalNumericSensorValue("Bypass level", getUrl(host, BYPASS_LEVEL_FIELD), "power_factor", "%")
     ])
 
 
