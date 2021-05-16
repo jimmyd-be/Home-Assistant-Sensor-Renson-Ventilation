@@ -6,6 +6,6 @@
     "version": "0.0.1",
     "dependencies": [],
     "codeowners": ["jimmyd-be"],
-    "requirements": ["requests"],
+    "requirements": ["requests", "aiohttp"],
     "iot_class": "local_polling"
   }
