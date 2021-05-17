@@ -13,6 +13,8 @@ import logging
 import aiohttp
 import asyncio
 import json
+from homeassistant.const import TEMP_CELSIUS
+
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -63,11 +65,10 @@ QUALITY_BAD = "Bad"
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_HOST, default=[]): cv.string})
 
-async def getFieldValue(coordinator, field):
-    for data in coordinator.data:
-        if data['Name'] == field:
-            _LOGGER.info(data['Value'])
-            return data['Value']
+def getFieldValue(coordinator, field):
+    for data in coordinator.data["ModifiedItems"]:
+        if data["Name"] == field:
+            return data["Value"]
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     host = config[CONF_HOST]
@@ -83,24 +84,13 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
                     raise UpdateFailed(f"Error communicating with API: {response.status}")
 
     coordinator = DataUpdateCoordinator(
-        hass,
+        hass, 
         _LOGGER,
-        # Name of the data. For logging purposes.
         name="sensor",
         update_method=async_update_data,
-        # Polling interval. Will only be polled if there are subscribers.
         update_interval=timedelta(seconds=30),
     )
 
-    #
-    # Fetch initial data so we have data when entities subscribe
-    #
-    # If the refresh fails, async_config_entry_first_refresh will
-    # raise ConfigEntryNotReady and setup will try again later
-    #
-    # If you do not want to retry setup on failure, use
-    # coordinator.async_refresh() instead
-    #
     await coordinator.async_config_entry_first_refresh()
 
     async_add_entities([
@@ -111,14 +101,14 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
         SensorValue(coordinator, "Ventilation level", CURRENT_LEVEL_FIELD, "", "", "string"),
         SensorValue(coordinator, "Total airflow out", CURRENT_AIRFLOW_EXTRACT_FIELD, "", "m³/h", "numeric"),
         SensorValue(coordinator, "Total airflow in", CURRENT_AIRFLOW_INGOING_FIELD, "", "m³/h", "numeric"),
-        SensorValue(coordinator, "Outdoor air temperature", OUTDOOR_TEMP_FIELD, "temperature", "°C", "numeric"),
-        SensorValue(coordinator, "Extract air temperature", INDOOR_TEMP_FIELD, "temperature", "°C", "numeric"),
+        SensorValue(coordinator, "Outdoor air temperature", OUTDOOR_TEMP_FIELD, "temperature", TEMP_CELSIUS, "numeric"),
+        SensorValue(coordinator, "Extract air temperature", INDOOR_TEMP_FIELD, "temperature", TEMP_CELSIUS, "numeric"),
         SensorValue(coordinator, "Filter change", FILTER_REMAIN_FIELD, "", "days", "numeric"),
         SensorValue(coordinator, "Relative humidity", HUMIDITY_FIELD, "humidity", "%", "numeric"),
         SensorValue(coordinator, "Frost protection active", FROST_PROTECTION_FIELD, "", "", "boolean"),
         SensorValue(coordinator, "Manual level", MANUAL_LEVEL_FIELD, "", "", "string"),
         SensorValue(coordinator, "System time", TIME_AND_DATE_FIELD, "timestamp", "", "string"),
-        SensorValue(coordinator, "Breeze temperature", BREEZE_TEMPERATURE_FIELD, "temperature", "°C", "numeric"),
+        SensorValue(coordinator, "Breeze temperature", BREEZE_TEMPERATURE_FIELD, "temperature", TEMP_CELSIUS, "numeric"),
         SensorValue(coordinator, "Breeze enabled", BREEZE_ENABLE_FIELD, "", "", "boolean"),
         SensorValue(coordinator, "Breeze level", BREEZE_LEVEL_FIELD, "", "", "string"),
         SensorValue(coordinator, "Breeze conditions met", BREEZE_MET_FIELD, "", "", "boolean"),
@@ -132,7 +122,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
         SensorValue(coordinator, "CO2 threshold", CO2_THRESHOLD_FIELD, "", "ppm", "numeric"),
         SensorValue(coordinator, "CO2 hysteresis", CO2_HYSTERESIS_FIELD, "", "ppm", "numeric"),
         SensorValue(coordinator, "Preheater enabled", PREHEATER_FIELD, "", "", "boolean"),
-        SensorValue(coordinator, "Bypass activation temperature", BYPASS_TEMPERATURE_FIELD, "temperature", "°C", "numeric"),
+        SensorValue(coordinator, "Bypass activation temperature", BYPASS_TEMPERATURE_FIELD, "temperature", TEMP_CELSIUS, "numeric"),
         SensorValue(coordinator, "Bypass level", BYPASS_LEVEL_FIELD, "power_factor", "%", "numeric")
     ])
 
@@ -146,7 +136,7 @@ class SensorValue(CoordinatorEntity):
         self.field = field
         self.deviceClass = deviceClass
         self.unitOfMeasurement = unitOfMeasurement
-        self.datatYPE = dataType
+        self.dataType = dataType
 
     @property
     def name(self):
@@ -162,18 +152,32 @@ class SensorValue(CoordinatorEntity):
 
     @property
     def state(self):
-        return self._state
+        if self.dataType == "numeric":
+            return round(float(getFieldValue(self.coordinator, self.field)))
+        elif self.dataType == "string":
+            return getFieldValue(self.coordinator, self.field)
+        elif self.dataType == "boolean":
+            return bool(int(getFieldValue(self.coordinator, self.field)))
+        elif self.dataType == "quality":
+            value = round(float(getFieldValue(self.coordinator, self.field)))
+            if value < 950:
+                return QUALITY_GOOD
+            elif value < 1500:
+                return QUALITY_POOR
+            else:
+                return QUALITY_BAD
+
 
     async def async_update(self):
         _LOGGER.info("update sensor state")
-        if dataType == "numeric":
-            self._state = round(float(await getFieldValue(self.coordinator, field)))
-        elif dataType == "string":
-            self._state = await getFieldValue(self.coordinator, field)
-        elif dataType == "boolean":
-            self._state = bool(int(await getFieldValue(self.coordinator, field)))
-        elif dataType == "quality":
-            value = round(float(await getFieldValue(self.coordinator, field)))
+        if self.dataType == "numeric":
+            self._state = round(float(await getFieldValue(self.coordinator, self.field)))
+        elif self.dataType == "string":
+            self._state = await getFieldValue(self.coordinator, self.field)
+        elif self.dataType == "boolean":
+            self._state = bool(int(await getFieldValue(self.coordinator, self.field)))
+        elif self.dataType == "quality":
+            value = round(float(await getFieldValue(self.coordinator, self.field)))
             if value < 950:
                 self._state = QUALITY_GOOD
             elif value < 1500:
