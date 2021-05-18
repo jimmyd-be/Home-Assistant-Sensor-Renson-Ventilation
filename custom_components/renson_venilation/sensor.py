@@ -23,6 +23,8 @@ DOMAIN = "renson_ventilation"
 CONF_HOST = "host"
 
 DATA_URL = "http://[host]/JSON/ModifiedItems?wsn=150324488709"
+FIRMWARE_URL = "http://[host]/JSON/Vars/Firmware%20version?index0=0&index1=0&index2=0"
+FIRMWARE_CHECK_URL = "http://www.renson-app.com/endura_delta/firmware/check.php"
 
 CO2_FIELD = "CO2"
 AIR_QUALITY_FIELD = "IAQ"
@@ -74,7 +76,6 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     host = config[CONF_HOST]
     
     async def async_update_data():
-        _LOGGER.info("update data")
         async with aiohttp.ClientSession() as session:
             async with session.get(DATA_URL.replace("[host]", host)) as response:
 
@@ -98,7 +99,8 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
         SensorValue(coordinator, "Air quality", AIR_QUALITY_FIELD, "", "", "quality"),
         SensorValue(coordinator, "CO2 value", CO2_FIELD, "carbon_dioxide", "ppm", "numeric"),
         SensorValue(coordinator, "Air quality value", AIR_QUALITY_FIELD, "", "ppm", "numeric"),
-        SensorValue(coordinator, "Ventilation level", CURRENT_LEVEL_FIELD, "", "", "string"),
+        SensorValue(coordinator, "Ventilation level raw", CURRENT_LEVEL_FIELD, "", "", "string"),
+        SensorValue(coordinator, "Ventilation level", CURRENT_LEVEL_FIELD, "", "", "level"),
         SensorValue(coordinator, "Total airflow out", CURRENT_AIRFLOW_EXTRACT_FIELD, "", "m³/h", "numeric"),
         SensorValue(coordinator, "Total airflow in", CURRENT_AIRFLOW_INGOING_FIELD, "", "m³/h", "numeric"),
         SensorValue(coordinator, "Outdoor air temperature", OUTDOOR_TEMP_FIELD, "temperature", TEMP_CELSIUS, "numeric"),
@@ -123,8 +125,41 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
         SensorValue(coordinator, "CO2 hysteresis", CO2_HYSTERESIS_FIELD, "", "ppm", "numeric"),
         SensorValue(coordinator, "Preheater enabled", PREHEATER_FIELD, "", "", "boolean"),
         SensorValue(coordinator, "Bypass activation temperature", BYPASS_TEMPERATURE_FIELD, "temperature", TEMP_CELSIUS, "numeric"),
-        SensorValue(coordinator, "Bypass level", BYPASS_LEVEL_FIELD, "power_factor", "%", "numeric")
+        SensorValue(coordinator, "Bypass level", BYPASS_LEVEL_FIELD, "power_factor", "%", "numeric"),
+        FirmwareSenor(host)
     ])
+
+class FirmwareSenor(Entity):
+
+    def __init__(self, host):
+        self.host = host
+        self._state = None
+
+    @property
+    def name(self):
+        return "Latest firmware"
+
+    @property
+    def state(self):
+        return self._state
+
+    async def async_update(self):
+        _LOGGER.info("update firmware check")
+        async with aiohttp.ClientSession() as session:
+            async with session.get(FIRMWARE_URL.replace("[host]", self.host)) as response:
+
+                if response.status == 200:
+                    version = (await response.json())["Value"].split()[-1]
+                    _LOGGER.info(version)
+
+                    jsonString = '{"a":"check", "name":"D_' + version + '.fuf"}'
+                    _LOGGER.info(jsonString)
+                    async with session.post(FIRMWARE_CHECK_URL, data=jsonString) as responseServer:
+                        if responseServer.status == 200:
+                            self._state = bool((await responseServer.json(content_type=None))["latest"])
+                    
+
+
 
 class SensorValue(CoordinatorEntity):
 
@@ -156,6 +191,8 @@ class SensorValue(CoordinatorEntity):
             return round(float(getFieldValue(self.coordinator, self.field)))
         elif self.dataType == "string":
             return getFieldValue(self.coordinator, self.field)
+        elif self.dataType == "level":
+            return getFieldValue(self.coordinator, self.field).split()[-1]
         elif self.dataType == "boolean":
             return bool(int(getFieldValue(self.coordinator, self.field)))
         elif self.dataType == "quality":
@@ -166,21 +203,3 @@ class SensorValue(CoordinatorEntity):
                 return QUALITY_POOR
             else:
                 return QUALITY_BAD
-
-
-    async def async_update(self):
-        _LOGGER.info("update sensor state")
-        if self.dataType == "numeric":
-            self._state = round(float(await getFieldValue(self.coordinator, self.field)))
-        elif self.dataType == "string":
-            self._state = await getFieldValue(self.coordinator, self.field)
-        elif self.dataType == "boolean":
-            self._state = bool(int(await getFieldValue(self.coordinator, self.field)))
-        elif self.dataType == "quality":
-            value = round(float(await getFieldValue(self.coordinator, self.field)))
-            if value < 950:
-                self._state = QUALITY_GOOD
-            elif value < 1500:
-                self._state = QUALITY_POOR
-            else:
-                self._state = QUALITY_BAD
