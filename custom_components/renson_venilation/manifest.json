@@ -3,7 +3,7 @@
     "name": "Renson ventilation unit integration",
     "documentation": "https://github.com/jimmyd-be/Home-Assistant-Sensor-Renson-Ventilation",
     "issue_tracker": "https://github.com/jimmyd-be/Home-Assistant-Sensor-Renson-Ventilation/issues",
-    "version": "0.0.1",
+    "version": "1.0.0",
     "dependencies": [],
     "codeowners": ["jimmyd-be"],
     "requirements": ["requests", "aiohttp"],

@@ -29,9 +29,11 @@ AIR_QUALITY_CONTROL_FIELD = "Trigger internal pollution alert on IAQ"
 CO2_CONTROL_FIELD = "Trigger internal pollution alert on CO2"
 CO2_THRESHOLD_FIELD = "CO2 threshold"
 CO2_HYSTERESIS_FIELD = "CO2 hysteresis"
+FILTER_DAYS_FIELD = "Filter preset time"
 
 
 manualLevels = ["Off", "Level1", "Level2", "Level3", "Level4"]
+timerLevels = ["Level1", "Level2", "Level3", "Level4", "Holiday", "Breeze"]
 
 class ValueData:
   def __init__(self, value):
@@ -75,7 +77,7 @@ def setup(hass, config):
         level = call.data.get("timer_level", "Level1")
         time = call.data.get("time", 0)
 
-        if level in manualLevels:
+        if level in timerLevels:
             data = ValueData(str(time) + " min " + level)
             r = requests.post(getUrl(host, TIMER_FIELD), data = json.dumps(data.__dict__))
 
@@ -184,7 +186,14 @@ def setup(hass, config):
 
             if r.status_code != 200:
                 _LOGGER.error('Ventilation unit did not return 200')
+    
+    def set_filter_days(call):
+        days = call.data.get("days", 90)
+        data = ValueData(str(int(days)))
+        r = requests.post(getUrl(host, FILTER_DAYS_FIELD), data = json.dumps(data.__dict__))
 
+        if r.status_code != 200:
+            _LOGGER.error('Ventilation unit did not return 200')
 
     hass.services.register(DOMAIN, "manual_level", handle_manual_level_set)
     hass.services.register(DOMAIN, "sync_time", handle_sync_time)
@@ -192,5 +201,6 @@ def setup(hass, config):
     hass.services.register(DOMAIN, "set_breeze", handle_set_breeze)
     hass.services.register(DOMAIN, "set_day_night_time", handle_set_time)
     hass.services.register(DOMAIN, "set_pollution_settings", handle_set_pollution)
+    hass.services.register(DOMAIN, "set_filter_days", set_filter_days)
 
     return True

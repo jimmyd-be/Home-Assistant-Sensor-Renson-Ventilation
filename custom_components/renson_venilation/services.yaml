@@ -52,6 +52,8 @@ timer_level:
             - "Level2"
             - "Level3"
             - "Level4"
+            - "Holiday"
+            - "Breeze"
     time:
       name: Time
       description: Time of the timer (0 will disable the timer)
@@ -195,4 +197,21 @@ set_pollution_settings:
         max: 400
         step: 50
         unit_of_measurement: "ppm"
+        mode: slider
+
+set_filter_days:
+  name: Set filter days
+  description: Indicates the recommended filter remaining time in case of filter change, in days
+  fields:
+    days:
+      name: Days
+      description: Indicates the recommended filter remaining time in case of filter change, in days
+      required: true
+      advanced: false
+      default: 90
+      number:
+        min: 0
+        max: 360
+        step: 1
+        unit_of_measurement: "days"
         mode: slider

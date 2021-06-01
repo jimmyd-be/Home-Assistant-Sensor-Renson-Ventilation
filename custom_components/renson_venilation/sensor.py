@@ -60,6 +60,8 @@ PREHEATER_FIELD = "Preheater enabled"
 BYPASS_TEMPERATURE_FIELD = "Bypass activation temperature"
 BYPASS_LEVEL_FIELD = "Bypass level"
 
+FILTER_PRESET_FIELD = "Filter preset time"
+
 QUALITY_GOOD = "Good"
 QUALITY_POOR = "Poor"
 QUALITY_BAD = "Bad"
@@ -126,6 +128,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
         SensorValue(coordinator, "Preheater enabled", PREHEATER_FIELD, "", "", "boolean"),
         SensorValue(coordinator, "Bypass activation temperature", BYPASS_TEMPERATURE_FIELD, "temperature", TEMP_CELSIUS, "numeric"),
         SensorValue(coordinator, "Bypass level", BYPASS_LEVEL_FIELD, "power_factor", "%", "numeric"),
+        SensorValue(coordinator, "Filter preset time", FILTER_PRESET_FIELD, "", "days", "numeric"),
         FirmwareSenor(host)
     ])
 
