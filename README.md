@@ -1,6 +1,9 @@
 
 # Home Assistant Sensor for Renson ventilation
 
+> :warning: **This integration will be added to the Home Assistant official integration soon.**: you can follow the progress on [Home assistant pull request](https://github.com/home-assistant/core/pull/56374). It is better to use that integration instead of this one. The official integration will be developed further in the future.
+
+
 This is an unofficial way of getting data from the ventilation system and changing some settings of the ventilation system.
 I will try to implement all features of the Endura delta app inside the integration of Home Assistant.
 
