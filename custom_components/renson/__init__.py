@@ -28,6 +28,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = renson_api
 
     hass.config_entries.async_setup_platforms(entry, PLATFORMS)
+    await hass.async_add_executor_job(setup_hass_services, hass, renson_api)
 
     return True
 
@@ -40,11 +41,8 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return unload_ok
 
 
-async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
+def setup_hass_services(hass: HomeAssistant, renson_api: RensonVentilation) -> None:
     """Set up the Renson platforms."""
-
-    host = hass.config_entries.async_entries(DOMAIN)[0].data[CONF_HOST]
-    renson_api = RensonVentilation(host)
 
     async def set_timer_level(call: ServiceCall) -> None:
         """Set timer level."""
@@ -117,5 +115,3 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     hass.services.async_register(DOMAIN, "set_filter_days", set_filter_days)
     hass.services.async_register(DOMAIN, "set_timer_level", set_timer_level)
     hass.services.async_register(DOMAIN, "sync_time", sync_time)
-
-    return True
