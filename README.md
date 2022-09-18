@@ -11,7 +11,12 @@ Tested with Endura Delta on firmware version 0.0.67
 
 ### Installation
 
-Copy this folder to `<config_dir>/custom_components/example_sensor/`.
+Use HACS to install the integration or copy this folder to `<config_dir>/custom_components/example_sensor/`.
+
+#### Recommended configuration
+It is recommended to configure the integration using the UI.
+
+#### Manual configuration
 
 Add the following to your `configuration.yaml` file:
 
@@ -30,6 +35,7 @@ renson_ventilation:
 ```
 
 ## Features
+- Configure intengration with UI
 - Set the manual level of the ventilation system.
 - Set ventilation timer
 - Set breeze feature settings and active/deactive breeze function
