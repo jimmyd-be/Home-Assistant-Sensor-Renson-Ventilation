@@ -310,6 +310,8 @@ class RensonSensor(CoordinatorEntity, SensorEntity):
         self.renson_api = renson_api
         self.raw_format = description.raw_format
 
+        self._attr_unique_id = f"renson-{description.key}"
+
     @property
     def native_value(self):
         """Return the value reported by the sensor."""
