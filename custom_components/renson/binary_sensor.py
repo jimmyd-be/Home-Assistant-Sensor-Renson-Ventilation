@@ -106,6 +106,8 @@ class RensonBinarySensor(CoordinatorEntity, BinarySensorEntity):
         self.field = description.field
         self.entity_description = description
 
+        self._attr_unique_id = f"renson-{description.key}"
+
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
