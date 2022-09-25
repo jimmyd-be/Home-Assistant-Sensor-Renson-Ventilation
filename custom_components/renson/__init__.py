@@ -1,7 +1,7 @@
 """The Renson integration."""
 from __future__ import annotations
 
-from renson_endura_delta.renson import ManualLevel, RensonVentilation, TimerLevel
+from renson_endura_delta.renson import Level, RensonVentilation
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, Platform
@@ -48,7 +48,7 @@ def setup_hass_services(hass: HomeAssistant, renson_api: RensonVentilation) -> N
         """Set timer level."""
         level_string = call.data.get("timer_level", "Level1")
         time = call.data.get("time", 0)
-        level = TimerLevel[level_string.upper()]
+        level = Level[level_string.upper()]
 
         await hass.async_add_executor_job(renson_api.set_timer_level, level, time)
 
@@ -59,7 +59,7 @@ def setup_hass_services(hass: HomeAssistant, renson_api: RensonVentilation) -> N
     async def set_manual_level(call: ServiceCall) -> None:
         """Set manual level."""
         level_string = call.data.get("manual_level", "Off")
-        level = ManualLevel[level_string.upper()]
+        level = Level[level_string.upper()]
 
         await hass.async_add_executor_job(renson_api.set_manual_level, level)
 

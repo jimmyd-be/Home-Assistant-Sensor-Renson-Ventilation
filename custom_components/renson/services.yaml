@@ -17,6 +17,7 @@ set_manual_level:
             - "Level3"
             - "Level4"
             - "Breeze"
+            - "Holiday"
 
 sync_time:
   name: Synchronize time and date
