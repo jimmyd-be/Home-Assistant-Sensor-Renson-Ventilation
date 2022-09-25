@@ -5,7 +5,7 @@ import logging
 from datetime import timedelta
 import async_timeout
 
-from renson_endura_delta.renson import ManualLevel, RensonVentilation, TimerLevel
+from renson_endura_delta.renson import Level, RensonVentilation
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, Platform
@@ -31,15 +31,19 @@ PLATFORMS = [
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Renson from a config entry."""
 
-    renson_api = RensonVentilation(entry.data[CONF_HOST])
+    api = RensonVentilation(entry.data[CONF_HOST])
+    coordinator = RensonCoordinator(hass, api)
 
-    if not await hass.async_add_executor_job(renson_api.connect):
+    if not await hass.async_add_executor_job(api.connect):
         raise ConfigEntryNotReady("Cannot connect to Renson device")
 
-    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = renson_api
+    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = {
+        'api': api,
+        'coordinator': coordinator,
+    }
 
     hass.config_entries.async_setup_platforms(entry, PLATFORMS)
-    await hass.async_add_executor_job(setup_hass_services, hass, renson_api)
+    await hass.async_add_executor_job(setup_hass_services, hass, api)
 
     return True
 

@@ -124,14 +124,16 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Call the Renson integration to setup."""
-    renson_api: RensonVentilation = hass.data[DOMAIN][config_entry.entry_id]
 
-    coordinator = RensonCoordinator(hass, renson_api)
+    api: RensonVentilation = hass.data[DOMAIN][config_entry.entry_id]['api']
+    coordinator: RensonCoordinator = hass.data[DOMAIN][config_entry.entry_id]['coordinator']
 
     await coordinator.async_config_entry_first_refresh()
 
     entities: list = []
     for description in BINARY_SENSORS:
-        entities.append(RensonBinarySensor(description, renson_api, coordinator))
+        entities.append(RensonBinarySensor(description, api, coordinator))
 
     async_add_entities(entities)
+
+    await coordinator.async_config_entry_first_refresh()

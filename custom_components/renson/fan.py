@@ -4,7 +4,7 @@ from __future__ import annotations
 import logging
 import math
 
-from renson_endura_delta.renson import ManualLevel, RensonVentilation
+from renson_endura_delta.renson import Level, RensonVentilation
 from renson_endura_delta.field_enum import CURRENT_LEVEL_FIELD, DataType
 
 from homeassistant.components.fan import FanEntity, FanEntityFeature
@@ -23,20 +23,20 @@ from .entity import RensonEntity
 _LOGGER = logging.getLogger(__name__)
 
 CMD_MAPPING = {
-    0: ManualLevel.HOLIDAY,
-    1: ManualLevel.LEVEL1,
-    2: ManualLevel.LEVEL2,
-    3: ManualLevel.LEVEL3,
-    4: ManualLevel.LEVEL4
+    0: Level.HOLIDAY,
+    1: Level.LEVEL1,
+    2: Level.LEVEL2,
+    3: Level.LEVEL3,
+    4: Level.LEVEL4
 }
 
 SPEED_MAPPING = {
-    ManualLevel.OFF.value: 0,
-    ManualLevel.HOLIDAY.value: 0,
-    ManualLevel.LEVEL1.value: 1,
-    ManualLevel.LEVEL2.value: 2,
-    ManualLevel.LEVEL3.value: 3,
-    ManualLevel.LEVEL4.value: 4,
+    Level.OFF.value: 0,
+    Level.HOLIDAY.value: 0,
+    Level.LEVEL1.value: 1,
+    Level.LEVEL2.value: 2,
+    Level.LEVEL3.value: 3,
+    Level.LEVEL4.value: 4,
 }
 
 
@@ -97,7 +97,7 @@ class RensonFan(RensonEntity, FanEntity):
         _LOGGER.debug("Changing fan speed percentage to %s", percentage)
 
         if percentage == 0:
-            cmd = ManualLevel.HOLIDAY
+            cmd = Level.HOLIDAY
         else:
             speed = math.ceil(percentage_to_ranged_value(SPEED_RANGE, percentage))
             cmd = CMD_MAPPING[speed]
@@ -107,13 +107,12 @@ class RensonFan(RensonEntity, FanEntity):
         await self.coordinator.async_request_refresh()
 
 async def async_setup_entry(
-    hass: HomeAssistant, config: ConfigEntry, async_add_entities: AddEntitiesCallback
+    hass: HomeAssistant, config_entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     """Set up the ComfoConnect fan platform."""
-    renson_api: RensonVentilation = hass.data[DOMAIN][config.entry_id]
-
-    coordinator = RensonCoordinator(hass, renson_api)
+    api: RensonVentilation = hass.data[DOMAIN][config_entry.entry_id]['api']
+    coordinator: RensonCoordinator = hass.data[DOMAIN][config_entry.entry_id]['coordinator']
 
     await coordinator.async_config_entry_first_refresh()
 
-    async_add_entities([RensonFan(renson_api, coordinator)])
+    async_add_entities([RensonFan(api, coordinator)])

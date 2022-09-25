@@ -302,19 +302,21 @@ class RensonSensor(RensonEntity, SensorEntity):
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    config: ConfigEntry,
+    config_entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
     discovery_info=None,
 ) -> None:
     """Call the Renson integration to setup."""
 
-    renson_api: RensonVentilation = hass.data[DOMAIN][config.entry_id]
-
-    coordinator = RensonCoordinator(hass, renson_api)
+    api: RensonVentilation = hass.data[DOMAIN][config_entry.entry_id]['api']
+    coordinator: RensonCoordinator = hass.data[DOMAIN][config_entry.entry_id]['coordinator']
 
     await coordinator.async_config_entry_first_refresh()
 
     entities: list = []
     for description in SENSORS:
-        entities.append(RensonSensor(description, renson_api, coordinator))
+        entities.append(RensonSensor(description, api, coordinator))
+
     async_add_entities(entities)
+
+    await coordinator.async_config_entry_first_refresh()
