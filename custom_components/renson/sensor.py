@@ -44,9 +44,9 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
+from . import RensonCoordinator
 from .const import CONCENTRATION_PARTS_PER_CUBIC_METER, DOMAIN
 from .entity import RensonEntity
-from . import RensonCoordinator
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {vol.Required(CONF_HOST, default=[]): cv.string}
@@ -308,8 +308,10 @@ async def async_setup_entry(
 ) -> None:
     """Call the Renson integration to setup."""
 
-    api: RensonVentilation = hass.data[DOMAIN][config_entry.entry_id]['api']
-    coordinator: RensonCoordinator = hass.data[DOMAIN][config_entry.entry_id]['coordinator']
+    api: RensonVentilation = hass.data[DOMAIN][config_entry.entry_id]["api"]
+    coordinator: RensonCoordinator = hass.data[DOMAIN][config_entry.entry_id][
+        "coordinator"
+    ]
 
     await coordinator.async_config_entry_first_refresh()
 

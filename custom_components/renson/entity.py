@@ -2,20 +2,20 @@
 from __future__ import annotations
 
 from renson_endura_delta.renson import RensonVentilation
-from renson_endura_delta.field_enum import (
-    DEVICE_NAME_FIELD,
-    FIRMWARE_VERSION_FIELD,
-    HARDWARE_VERSION_FIELD,
-)
 
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DOMAIN
 from . import RensonCoordinator
+from .const import DOMAIN
+
 
 class RensonEntity(CoordinatorEntity):
-    def __init__(self, name: str, api: RensonVentilation, coordinator: RensonCoordinator) -> None:
+    """Renson entity."""
+
+    def __init__(
+        self, name: str, api: RensonVentilation, coordinator: RensonCoordinator
+    ) -> None:
         """Initialize the ComfoConnect fan."""
         super().__init__(coordinator)
 
@@ -24,7 +24,9 @@ class RensonEntity(CoordinatorEntity):
             manufacturer="Renson",
             model=api.get_field_value(coordinator.data, "Device name"),
             name="Ventilation",
-            sw_version=api.get_field_value(coordinator.data, "Firmware version").split()[-1],
+            sw_version=api.get_field_value(
+                coordinator.data, "Firmware version"
+            ).split()[-1],
             hw_version=api.get_field_value(coordinator.data, "Hardware version"),
         )
 

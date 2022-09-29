@@ -1,21 +1,17 @@
 """The Renson integration."""
 from __future__ import annotations
 
-import logging
 from datetime import timedelta
-import async_timeout
+import logging
 
+import async_timeout
 from renson_endura_delta.renson import Level, RensonVentilation
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, Platform
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.exceptions import ConfigEntryNotReady
-from homeassistant.helpers.typing import ConfigType
-from homeassistant.helpers.update_coordinator import (
-    DataUpdateCoordinator,
-    UpdateFailed,
-)
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .const import DOMAIN
 
@@ -38,8 +34,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         raise ConfigEntryNotReady("Cannot connect to Renson device")
 
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = {
-        'api': api,
-        'coordinator': coordinator,
+        "api": api,
+        "coordinator": coordinator,
     }
 
     hass.config_entries.async_setup_platforms(entry, PLATFORMS)
@@ -131,6 +127,7 @@ def setup_hass_services(hass: HomeAssistant, renson_api: RensonVentilation) -> N
     hass.services.async_register(DOMAIN, "set_timer_level", set_timer_level)
     hass.services.async_register(DOMAIN, "sync_time", sync_time)
 
+
 class RensonCoordinator(DataUpdateCoordinator):
     """My custom coordinator."""
 
@@ -153,4 +150,3 @@ class RensonCoordinator(DataUpdateCoordinator):
                 return await self.hass.async_add_executor_job(self.api.get_all_data)
         except Exception as err:
             raise UpdateFailed(f"Error communicating with API: {err}") from err
-

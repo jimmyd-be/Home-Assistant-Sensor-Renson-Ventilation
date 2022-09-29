@@ -23,8 +23,8 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN
 from . import RensonCoordinator
+from .const import DOMAIN
 from .entity import RensonEntity
 
 
@@ -125,8 +125,10 @@ async def async_setup_entry(
 ) -> None:
     """Call the Renson integration to setup."""
 
-    api: RensonVentilation = hass.data[DOMAIN][config_entry.entry_id]['api']
-    coordinator: RensonCoordinator = hass.data[DOMAIN][config_entry.entry_id]['coordinator']
+    api: RensonVentilation = hass.data[DOMAIN][config_entry.entry_id]["api"]
+    coordinator: RensonCoordinator = hass.data[DOMAIN][config_entry.entry_id][
+        "coordinator"
+    ]
 
     await coordinator.async_config_entry_first_refresh()
 

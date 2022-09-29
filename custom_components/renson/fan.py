@@ -3,11 +3,13 @@ from __future__ import annotations
 
 import logging
 import math
+from typing import Any
 
-from renson_endura_delta.renson import Level, RensonVentilation
 from renson_endura_delta.field_enum import CURRENT_LEVEL_FIELD, DataType
+from renson_endura_delta.renson import Level, RensonVentilation
 
 from homeassistant.components.fan import FanEntity, FanEntityFeature
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.util.percentage import (
@@ -16,8 +18,8 @@ from homeassistant.util.percentage import (
     ranged_value_to_percentage,
 )
 
+from . import RensonCoordinator
 from .const import DOMAIN
-from .import RensonCoordinator
 from .entity import RensonEntity
 
 _LOGGER = logging.getLogger(__name__)
@@ -27,7 +29,7 @@ CMD_MAPPING = {
     1: Level.LEVEL1,
     2: Level.LEVEL2,
     3: Level.LEVEL3,
-    4: Level.LEVEL4
+    4: Level.LEVEL4,
 }
 
 SPEED_MAPPING = {
@@ -40,7 +42,8 @@ SPEED_MAPPING = {
 }
 
 
-SPEED_RANGE = (1,4)
+SPEED_RANGE = (1, 4)
+
 
 class RensonFan(RensonEntity, FanEntity):
     """Representation of the Renson fan platform."""
@@ -58,7 +61,10 @@ class RensonFan(RensonEntity, FanEntity):
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
-        level = self.api.parse_value(self.api.get_field_value(self.coordinator.data, CURRENT_LEVEL_FIELD.name), DataType.LEVEL)
+        level = self.api.parse_value(
+            self.api.get_field_value(self.coordinator.data, CURRENT_LEVEL_FIELD.name),
+            DataType.LEVEL,
+        )
 
         self.current_speed = SPEED_MAPPING[level]
 
@@ -106,12 +112,17 @@ class RensonFan(RensonEntity, FanEntity):
 
         await self.coordinator.async_request_refresh()
 
+
 async def async_setup_entry(
-    hass: HomeAssistant, config_entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the ComfoConnect fan platform."""
-    api: RensonVentilation = hass.data[DOMAIN][config_entry.entry_id]['api']
-    coordinator: RensonCoordinator = hass.data[DOMAIN][config_entry.entry_id]['coordinator']
+    api: RensonVentilation = hass.data[DOMAIN][config_entry.entry_id]["api"]
+    coordinator: RensonCoordinator = hass.data[DOMAIN][config_entry.entry_id][
+        "coordinator"
+    ]
 
     await coordinator.async_config_entry_first_refresh()
 
