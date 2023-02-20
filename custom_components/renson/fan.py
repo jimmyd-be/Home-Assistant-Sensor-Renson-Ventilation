@@ -110,8 +110,6 @@ class RensonFan(RensonEntity, FanEntity):
 
         await self.hass.async_add_executor_job(self.api.set_manual_level, cmd)
 
-        await self.coordinator.async_request_refresh()
-
 
 async def async_setup_entry(
     hass: HomeAssistant,
