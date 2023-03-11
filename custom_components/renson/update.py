@@ -14,18 +14,22 @@ from . import RensonFirmwareCoordinator
 from .const import DOMAIN
 from .entity import RensonEntity
 
-class RensonUpdate(RensonEntity, UpdateEntity):
 
-    def __init__(self, api: RensonVentilation, coordinator: RensonFirmwareCoordinator) -> None:
-        """Initialize the Renson fan."""
+class RensonUpdate(RensonEntity, UpdateEntity):
+    """Representation of the Renson firmware update check."""
+
+    def __init__(
+        self, api: RensonVentilation, coordinator: RensonFirmwareCoordinator
+    ) -> None:
+        """Initialize the Renson firmware update check."""
         super().__init__("update", api, coordinator)
 
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
         self._attr_installed_version = self.api.get_field_value(
-                self.coordinator.data, FIRMWARE_VERSION_FIELD.name
-            ).split()[-1]
+            self.coordinator.data, FIRMWARE_VERSION_FIELD.name
+        ).split()[-1]
 
         self._attr_latest_version = self.coordinator.data["latest_firmware_version"]
 
