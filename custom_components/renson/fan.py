@@ -39,6 +39,7 @@ SPEED_MAPPING = {
     Level.LEVEL2.value: 2,
     Level.LEVEL3.value: 3,
     Level.LEVEL4.value: 4,
+    Level.BREEZE.value: 'Breeze',
 }
 
 
