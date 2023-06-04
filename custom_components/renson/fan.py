@@ -5,7 +5,7 @@ import logging
 import math
 from typing import Any
 
-from renson_endura_delta.field_enum import CURRENT_LEVEL_FIELD, DataType
+from renson_endura_delta.field_enum import CURRENT_LEVEL_FIELD, BREEZE_LEVEL_FIELD, DataType
 from renson_endura_delta.renson import Level, RensonVentilation
 
 from homeassistant.components.fan import FanEntity, FanEntityFeature
@@ -39,7 +39,6 @@ SPEED_MAPPING = {
     Level.LEVEL2.value: 2,
     Level.LEVEL3.value: 3,
     Level.LEVEL4.value: 4,
-    Level.BREEZE.value: 'Breeze',
 }
 
 
@@ -66,7 +65,14 @@ class RensonFan(RensonEntity, FanEntity):
             DataType.LEVEL,
         )
 
-        self.current_speed = SPEED_MAPPING[level]
+        if level is 'Breeze':
+            breeze_level = self.api.parse_value(
+                self.api.get_field_value(self.coordinator.data, BREEZE_LEVEL_FIELD.name),
+                DataType.LEVEL,
+            )
+            self.current_speed = SPEED_MAPPING[breeze_level]
+        else:
+            self.current_speed = SPEED_MAPPING[level]
 
         self.async_write_ha_state()
 
