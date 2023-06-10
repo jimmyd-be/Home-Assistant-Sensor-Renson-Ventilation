@@ -5,7 +5,7 @@ import logging
 import math
 from typing import Any
 
-from renson_endura_delta.field_enum import CURRENT_LEVEL_FIELD, BREEZE_LEVEL_FIELD, DataType
+from renson_endura_delta.field_enum import CURRENT_LEVEL_FIELD, BREEZE_LEVEL_FIELD, BREEZE_TEMPERATURE_FIELD, DataType
 from renson_endura_delta.renson import Level, RensonVentilation
 
 from homeassistant.components.fan import FanEntity, FanEntityFeature
@@ -65,7 +65,7 @@ class RensonFan(RensonEntity, FanEntity):
             DataType.LEVEL,
         )
 
-        if level is 'Breeze':
+        if level == Level.BREEZE.value:
             breeze_level = self.api.parse_value(
                 self.api.get_field_value(self.coordinator.data, BREEZE_LEVEL_FIELD.name),
                 DataType.LEVEL,
@@ -108,13 +108,23 @@ class RensonFan(RensonEntity, FanEntity):
         """Set fan speed percentage."""
         _LOGGER.debug("Changing fan speed percentage to %s", percentage)
 
+        level = self.api.parse_value(
+            self.api.get_field_value(self.coordinator.data, CURRENT_LEVEL_FIELD.name),
+            DataType.LEVEL,
+        )
+
         if percentage == 0:
             cmd = Level.HOLIDAY
         else:
             speed = math.ceil(percentage_to_ranged_value(SPEED_RANGE, percentage))
             cmd = CMD_MAPPING[speed]
 
-        await self.hass.async_add_executor_job(self.api.set_manual_level, cmd)
+        if level == Level.BREEZE.value:
+            all_data = self.coordinator.data
+            breeze_temp = self.api.get_field_value(all_data, BREEZE_TEMPERATURE_FIELD)
+            await self.hass.async_add_executor_job(self.api.set_breeze, cmd.name, breeze_temp, True)
+        else:
+            await self.hass.async_add_executor_job(self.api.set_manual_level, cmd)
 
 
 async def async_setup_entry(

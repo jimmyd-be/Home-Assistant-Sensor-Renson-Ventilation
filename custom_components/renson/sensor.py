@@ -165,14 +165,14 @@ SENSORS: tuple[RensonSensorEntityDescription, ...] = (
         raw_format=False,
         device_class=SensorDeviceClass.TEMPERATURE,
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
-        entity_registry_enabled_default=False,
+        entity_registry_enabled_default=True,
     ),
     RensonSensorEntityDescription(
         key="BREEZE_LEVEL_FIELD",
         name="Breeze level",
         field=BREEZE_LEVEL_FIELD,
         raw_format=False,
-        entity_registry_enabled_default=False,
+        entity_registry_enabled_default=True,
     ),
     RensonSensorEntityDescription(
         key="DAYTIME_FIELD",
