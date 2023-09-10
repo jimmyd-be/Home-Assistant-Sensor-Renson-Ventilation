@@ -22,6 +22,7 @@ PLATFORMS = [
     Platform.SENSOR,
     Platform.BINARY_SENSOR,
     Platform.FAN,
+    Platform.SWITCH,
     Platform.UPDATE,
 ]
 
