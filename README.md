@@ -4,7 +4,7 @@
 
 # Home Assistant Sensor for Renson ventilation
 
-> :warning: **This integration will be added to the Home Assistant official integration soon.**: you can follow the progress on [Home assistant pull request](https://github.com/home-assistant/core/pull/56374). It is better to use that integration instead of this one. The official integration will be developed further in the future.
+> :warning: **This integration is already available to the official Home Assistant integrations. Most of the features of this plugin are already in the official ones. Missing features will be add in the future. It is better to use that integration instead of this one. The official integration will be developed further in the future.
 
 
 This is an unofficial way of getting data from the ventilation system and changing some settings of the ventilation system.
